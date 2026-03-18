@@ -39,7 +39,7 @@ async function sendOTPEmail(toEmail , otp){
      console.log("✅ OTP sent");
 
   }catch(err){
-    console.log("❌ OTP error:", error.message);
+    console.log("❌ OTP error:", err.message);
   }
 }
 
