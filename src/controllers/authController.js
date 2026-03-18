@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/generateOTP.js");
 const {
-  sendWelcomeEmail,
   sendOTPEmail,
 } = require("../services/emailService.js");
 
@@ -112,6 +111,9 @@ exports.loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, existedUser.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid Credentials" });
+    }
+    if(!existedUser.isverified){
+      return res.status(400).json({ message: "Please verify your email first " });
     }
     const token = jwt.sign({ id: existedUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
