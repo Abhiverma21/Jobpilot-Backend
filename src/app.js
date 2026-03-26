@@ -13,13 +13,14 @@ const protect = require("./middleware/authMiddleware.js");
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended:true}))
 
 
 app.get("/", (req,res)=>{
     res.send("App is working")
 })
 
-//signup route api
+//auth route api
 app.use("/api/auth" , authRoute);
 
 //Job route api 
@@ -27,6 +28,8 @@ app.use("/api/jobs" , jobRoute);
 
 //upload resume api 
 app.use("/api/resume" , resumeRoute);
+
+
 
 //mongodb connection
 connectDB();

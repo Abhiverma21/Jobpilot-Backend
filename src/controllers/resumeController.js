@@ -5,6 +5,11 @@ const extractSkill = require("../utils/skillExtractor.js");
 
 exports.uploadResume = async(req,res)=>{
     try{
+        // Check if file exists
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
         const pdfData =  await pdfParse(req.file.buffer);
 
         const text = pdfData.text;

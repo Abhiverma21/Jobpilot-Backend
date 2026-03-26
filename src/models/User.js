@@ -19,7 +19,14 @@ const userSchema  = new mongoose.Schema({
     isverified : {
         type : Boolean,
         default : false,
-    }
+    },
+    phone : String,
+    bio : String,
+    location : String,
+    profilePic : String,
+    skills:[String],
+    
+
 },
 {timestamps:true}
 );

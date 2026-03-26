@@ -1,4 +1,5 @@
 const User = require("../models/User.js");
+const cloudinary = require("../utils/cloudinary.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const generateOTP = require("../utils/generateOTP.js");
@@ -141,8 +142,85 @@ exports.getUserProfile = async (req, res) => {
       _id: user._id,
       username: user.username,
       email: user.email,
+      phone : user.phone,
+      bio : user.bio,
+      location : user.location,
+      profilePic : user.profilePic,
+      skills : user.skills
     });
   } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const { username, phone, bio, location, profilePic, skills } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (username) user.username = username;
+    if (phone !== undefined) user.phone = phone;
+    if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
+    if (profilePic !== undefined) user.profilePic = profilePic;
+    if (skills) user.skills = skills;
+    await user.save();
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const { username, phone, bio, location } = req.body;
+
+    let skills = [];
+    if (req.body.skills) {
+      skills = JSON.parse(req.body.skills);
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // profile image upload
+    if (req.file) {
+      // Upload buffer directly to cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "job-tracker-profiles" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      user.profilePic = result.secure_url;
+    }
+
+    if (username) user.username = username;
+    if (phone !== undefined) user.phone = phone;
+    if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
+    if (skills.length > 0) {
+      user.skills = skills;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
